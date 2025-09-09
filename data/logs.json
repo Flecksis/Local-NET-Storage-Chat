@@ -1,0 +1,23 @@
+[
+  {
+    "id": "fc4315c8-d71a-451a-b741-ec31496c13aa",
+    "username": "52",
+    "action": "login",
+    "details": "User logged in",
+    "timestamp": "2025-09-09 23:45:12.164303"
+  },
+  {
+    "id": "c190911b-d787-4c97-9b90-cac58cffe430",
+    "username": "52",
+    "action": "list_files",
+    "details": "Перечисленные файлы в common/",
+    "timestamp": "2025-09-09 23:45:12.657560"
+  },
+  {
+    "id": "6bde1db7-d201-42ed-9ac8-ad187c729ce3",
+    "username": "52",
+    "action": "list_files",
+    "details": "Перечисленные файлы в common/",
+    "timestamp": "2025-09-09 23:45:42.697718"
+  }
+]

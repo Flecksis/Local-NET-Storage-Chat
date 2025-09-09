@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Журнал аудита - NowDrop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            background-color: #1a202c;
+            color: #1a202c;
+        }
+        .bg-white {
+            background-color: #1a202c;
+        }
+        .bg-gray-50 {
+            background-color: #1a202c;
+        }
+        .text-gray-700 {
+            color: #1a202c;
+        }
+        .border-gray-200 {
+            border-color: #1a202c;
+        }
+        .bg-indigo-600 {
+            background-color: #1a202c;
+        }
+        .hover\:bg-gray-50:hover {
+            background-color: #1a202c;
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans">
+    <div class="container mx-auto p-4">
+        <header class="bg-indigo-600 text-white p-4 rounded-lg shadow-md mb-6">
+            <div class="flex justify-between items-center">
+                <h1 class="text-2xl font-bold">Журнал аудита NowDrop</h1>
+                <a href="/admin" class="bg-black text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-800 transition">admin</a>
+                <form action="/logout" method="post">
+                    <button type="submit" class="bg-black text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-800 transition">Выйти</button>
+                </form>
+            </div>
+            <p>Добро пожаловать, {{ admin.name }}!</p>
+        </header>
+
+        <div class="bg-white p-6 rounded-lg shadow-lg">
+            <h2 class="text-xl font-semibold mb-4">Журнал действий пользователей</h2>
+            <div class="flex flex-col md:flex-row gap-4 mb-4">
+                <div>
+                    <label class="block text-gray-700">Фильтр по пользователю</label>
+                    <input id="userFilter" type="text" class="w-full p-2 border rounded-lg" placeholder="Введите логин">
+                </div>
+                <div>
+                    <label class="block text-gray-700">Фильтр по действию</label>
+                    <select id="actionFilter" class="w-full p-2 border rounded-lg">
+                        <option value="">Все действия</option>
+                        <option value="login">Вход</option>
+                        <option value="logout">Выход</option>
+                        <option value="create_user">Создание пользователя</option>
+                        <option value="update_user">Обновление пользователя</option>
+                        <option value="delete_user">Удаление пользователя</option>
+                        <option value="send_message">Отправка сообщения</option>
+                        <option value="list_files">Просмотр файлов</option>
+                        <option value="upload_file">Загрузка файла</option>
+                        <option value="delete_file">Удаление файла</option>
+                        <option value="download_file">Скачивание файла</option>
+                        <option value="rename_file">Переименование файла</option>
+                        <option value="create_folder">Создание папки</option>
+                    </select>
+                </div>
+            </div>
+            <table class="min-w-full bg-white border border-gray-200">
+                <thead>
+                    <tr class="bg-gray-50">
+                        <th class="py-2 px-4 border-b">Пользователь</th>
+                        <th class="py-2 px-4 border-b">Действие</th>
+                        <th class="py-2 px-4 border-b">Детали</th>
+                        <th class="py-2 px-4 border-b">Время</th>
+                    </tr>
+                </thead>
+                <tbody id="logTable">
+                    {% for log in logs %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="py-2 px-4 border-b">{{ log.username }}</td>
+                        <td class="py-2 px-4 border-b">{{ log.action }}</td>
+                        <td class="py-2 px-4 border-b">{{ log.details }}</td>
+                        <td class="py-2 px-4 border-b">{{ log.timestamp }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function filterLogs() {
+            const userFilter = document.getElementById('userFilter').value.toLowerCase();
+            const actionFilter = document.getElementById('actionFilter').value;
+            const rows = document.querySelectorAll('#logTable tr');
+            rows.forEach(row => {
+                const username = row.children[0].textContent.toLowerCase();
+                const action = row.children[1].textContent;
+                const show = (!userFilter || username.includes(userFilter)) && (!actionFilter || action === actionFilter);
+                row.style.display = show ? '' : 'none';
+            });
+        }
+
+        document.getElementById('userFilter').addEventListener('input', filterLogs);
+        document.getElementById('actionFilter').addEventListener('change', filterLogs);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Панель управления | NowDrop</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --dark: #1f2937;
+            --darker: #111827;
+            --light: #f3f4f6;
+            --accent: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: var(--darker);
+            color: var(--light);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background: rgba(31, 41, 55, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            flex-shrink: 0;
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 0.25rem;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .nav-tab {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            border: none;
+            color: var(--light);
+            cursor: pointer;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        .nav-tab.active {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+        }
+
+        .nav-tab-text {
+            display: none;
+        }
+
+        .logout-btn {
+            padding: 0.5rem;
+            background: linear-gradient(45deg, var(--danger), #dc2626);
+            border: none;
+            border-radius: 0.5rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+        }
+
+        .content {
+            flex: 1;
+            padding: 1rem;
+            overflow: hidden;
+            height: calc(100vh - 80px);
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+            height: 100%;
+        }
+
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-container {
+            background: rgba(31, 41, 55, 0.8);
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 1rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .message {
+            padding: 0.75rem;
+            border-radius: 1rem;
+            max-width: 85%;
+            animation: messageSlide 0.3s ease;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        @keyframes messageSlide {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.own {
+            background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+            align-self: flex-end;
+            margin-left: auto;
+        }
+
+        .message.other {
+            background: rgba(31, 41, 55, 0.6);
+            align-self: flex-start;
+            margin-right: auto;
+        }
+
+        .message-sender {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            font-size: 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .message-text {
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .message-time {
+            font-size: 0.65rem;
+            opacity: 0.7;
+            margin-left: 0.35rem;
+        }
+
+        .chat-input {
+            padding: 1rem;
+            background: rgba(17, 24, 39, 0.6);
+            display: flex;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 0.75rem;
+            background: rgba(31, 41, 55, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            color: var(--light);
+            font-size: 1rem;
+            min-height: 44px;
+        }
+
+        .chat-input button {
+            padding: 0.75rem 1rem;
+            background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+            border: none;
+            border-radius: 0.5rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 44px;
+            min-height: 44px;
+        }
+
+        .files-container {
+            display: flex;
+            flex-direction: column;
+            height: auto%;
+            gap: 1rem;
+        }
+
+        .mobile-tabs {
+            display: flex;
+            background: rgba(31, 41, 55, 0.8);
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        .mobile-tab {
+            flex: 1;
+            padding: 0.75rem;
+            text-align: center;
+            background: transparent;
+            border: none;
+            color: var(--light);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mobile-tab.active {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary);
+        }
+
+        .files-content {
+            background: rgba(31, 41, 55, 0.8);
+            border-radius: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .files-header {
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+            flex: 1;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding-right: 1rem;
+        }
+
+        .breadcrumb-item {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            transition: background 0.2s;
+        }
+
+        .breadcrumb-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .breadcrumb-separator {
+            margin: 0 0.25rem;
+            opacity: 0.5;
+        }
+
+        .upload-btn {
+            padding: 0.5rem 1rem;
+            background: linear-gradient(45deg, var(--accent), #059669);
+            border: none;
+            border-radius: 0.5rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            min-height: 44px;
+        }
+
+        .files-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 0.75rem;
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+            min-height: 200px;
+        }
+
+        .file-card {
+            background: rgba(17, 24, 39, 0.6);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            touch-action: manipulation;
+            height: 150px;
+
+        }
+
+        .file-card:active {
+            transform: scale(0.95);
+        }
+
+        .file-card.folder {
+            border-color: var(--warning);
+        }
+
+        .file-card.selected {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .file-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-icon.folder {
+            color: var(--warning);
+        }
+
+        .file-name {
+            font-weight: 600;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+        }
+
+        .file-details {
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 0.25rem;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 2000;
+            display: none;
+        }
+
+        .progress-bar-inner {
+            height: 100%;
+            background: linear-gradient(45deg, var(--accent), var(--primary));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .drop-zone-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(99, 102, 241, 0.2);
+            border: 2px dashed var(--primary);
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .drop-zone-overlay.active {
+            opacity: 1;
+        }
+
+        .drop-zone-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-align: center;
+        }
+
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            padding: 1rem;
+        }
+
+        .modal-backdrop.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal {
+            background: var(--dark);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            transform: translateY(20px);
+            transition: all 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-backdrop.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--light);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-body {
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-input {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(17, 24, 39, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 0.5rem;
+            color: var(--light);
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            min-height: 44px;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        .modal-btn {
+            padding: 0.75rem 1.25rem;
+            border: none;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-height: 44px;
+            min-width: 80px;
+        }
+
+        .modal-btn.primary {
+            background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .modal-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--light);
+        }
+
+        .context-menu {
+            position: fixed;
+            background: var(--dark);
+            border-radius: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            z-index: 1500;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            min-width: 200px;
+        }
+
+        .context-item {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.2s ease;
+            min-height: 44px;
+        }
+
+        .context-item:active {
+            background: rgba(99, 102, 241, 0.3);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--dark);
+            color: var(--light);
+            padding: 1rem 1.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            z-index: 2000;
+            opacity: 0;
+            transition: all 0.3s ease;
+            max-width: 90%;
+            text-align: center;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-10px);
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .chat-loading {
+            text-align: center;
+            padding: 1rem;
+            color: rgba(255, 255, 255, 极速5);
+        }
+
+        .no-files {
+            text-align: center;
+            padding: 2rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        @media (min-width: 768px) {
+            .nav-tab-text {
+                display: inline;
+            }
+
+            .navbar {
+                padding: 1rem 2rem;
+            }
+
+            .content {
+                padding: 2rem;
+            }
+
+            .files-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo span {
+                display: none;
+            }
+
+            .nav-tabs {
+                gap: 0.1rem;
+            }
+
+            .nav-tab {
+                padding: 0.4rem 0.6rem;
+                font-size: 0.8rem;
+            }
+
+            .files-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+                gap: 0.5rem;
+                padding: 0.75rem;
+            }
+
+            .file-icon {
+                font-size: 1.5rem;
+            }
+
+            .file-name {
+                font-size: 0.7rem;
+            }
+        }
+
+        * {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <nav class="navbar">
+            <div class="logo">
+                <i class="fas fa-bolt"></i>
+                <span>NowDrop</span>
+            </div>
+
+            <div class="nav-tabs">
+                <button class="nav-tab" data-tab="chat">
+                    <i class="fas fa-comments"></i>
+                    <span class="nav-tab-text">Чат</span>
+                </button>
+                <button class="nav-tab active" data-tab="files">
+                    <i class="fas fa-folder"></i>
+                    <span class="nav-tab-text">Файлы</span>
+                </button>
+            </div>
+
+            <form action="/logout" method="post" id="logout-form">
+                <button type="submit" class="logout-btn" title="Выйти">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </form>
+        </nav>
+
+        <main class="content">
+            <div class="tab-content" id="chat-tab">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="chat-loading">Загрузка сообщений...</div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" id="message-input" placeholder="Введите сообщение..." enterkeyhint="send">
+                        <button type="button" id="send-button" title="Отправить">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-content active" id="files-tab">
+                <div class="files-container">
+                    <div class="mobile-tabs">
+                        <button class="mobile-tab active" data-category="common">
+                            <i class="fas fa-users"></i>
+                            Общие
+                        </button>
+                        <button class="mobile-tab" data-category="personal">
+                            <i class="fas fa-user"></i>
+                            Личные
+                        </button>
+                    </div>
+
+                    <div class="files-content" id="files-content">
+                        <div class="files-header">
+                            <div class="breadcrumb" id="breadcrumb">
+                                <div class="breadcrumb-item" data-path="">Файлы</div>
+                            </div>
+                            <input type="file" id="file-upload" style="display: none;" multiple>
+                            <button class="upload-btn" onclick="document.getElementById('file-upload').click()">
+                                <i class="fas fa-upload"></i>
+                                <span>Загрузить</span>
+                            </button>
+                        </div>
+
+                        <div class="files-grid" id="files-grid">
+                            <div class="loading">Загрузка файлов...</div>
+                        </div>
+
+                        <div class="drop-zone-overlay" id="drop-zone">
+                            <div class="drop-zone-text">Перетащите файлы сюда</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="progress-bar" id="progress-bar">
+        <div class="progress-bar-inner" id="progress-bar-inner"></div>
+    </div>
+
+    <div class="modal-backdrop" id="rename-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Переименовать</h3>
+                <button class="modal-close" onclick="closeModal('rename-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="modal-input" id="rename-input" placeholder="Новое имя" enterkeyhint="done">
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn secondary" onclick="closeModal('rename-modal')">Отмена</button>
+                <button class="modal-btn primary" onclick="renameFile()">ОК</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="delete-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Удалить</h3>
+                <button class="modal-close" onclick="closeModal('delete-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Удалить <strong id="delete-filename"></strong>?</p>
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn secondary" onclick="closeModal('delete-modal')">Отмена</button>
+                <button class="modal-btn primary" onclick="deleteFile()">Удалить</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-backdrop" id="folder-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 class="modal-title">Новая папка</h3>
+                <button class="modal-close" onclick="closeModal('folder-modal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="modal-input" id="folder-input" placeholder="Имя папки" enterkeyhint="done">
+            </div>
+            <div class="modal-footer">
+                <button class="modal-btn secondary" onclick="closeModal('folder-modal')">Отмена</button>
+                <button class="modal-btn primary" onclick="createFolder()">Создать</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="context-menu" id="context-menu">
+        <div class="context-item" onclick="downloadSelectedFile()">
+            <i class="fas fa-download"></i>
+            <span>Скачать</span>
+        </div>
+        <div class="context-item" onclick="openRenameModal()">
+            <i class="fas fa-edit"></i>
+            <span>Переименовать</span>
+        </div>
+        <div class="context-item" onclick="openDeleteModal()">
+            <i class="fas fa-trash"></i>
+            <span>Удалить</span>
+        </div>
+        <div class="context-item" onclick="createNewFolder()">
+            <i class="fas fa-folder-plus"></i>
+            <span>Новая папка</span>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let currentCategory = 'common';
+        let selectedFile = null;
+        let files = [];
+        let lastChatUpdate = 0;
+        let isUploading = false;
+        let currentPath = '';
+        let pathHistory = [];
+
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        let touchStartTime = 0;
+        let touchTimer = null;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initApp();
+        });
+
+        function initApp() {
+            setupEventListeners();
+            loadChat();
+            loadFiles();
+
+            setInterval(() => {
+                if (document.getElementById('chat-tab').classList.contains('active')) {
+                    loadChat();
+                }
+            }, 5000);
+        }
+
+        function setupEventListeners() {
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    switchTab(tab.dataset.tab);
+                });
+            });
+
+            document.querySelectorAll('.mobile-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.mobile-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    currentCategory = tab.dataset.category;
+                    resetNavigation();
+                    loadFiles();
+                });
+            });
+
+            sendButton.addEventListener('click', sendMessage);
+            messageInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendMessage();
+            });
+
+            fileUpload.addEventListener('change', handleFileSelect);
+
+            setupDragAndDrop();
+
+            setupTouchEvents();
+
+            document.addEventListener('click', hideContextMenu);
+
+            filesGrid.addEventListener('dblclick', handleDoubleClick);
+        }
+
+        function setupDragAndDrop() {
+            const dropZone = document.getElementById('drop-zone');
+            const filesContent = document.getElementById('files-content');
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                filesContent.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('active');
+                });
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                filesContent.addEventListener(eventName, (e) => {
+                    e.preventDefault();
+                    dropZone.classList.remove('active');
+                });
+            });
+
+            filesContent.addEventListener('drop', (e) => {
+                e.preventDefault();
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleDroppedFiles(files);
+                }
+            });
+        }
+
+        function setupTouchEvents() {
+            const filesGrid = document.getElementById('files-grid');
+
+            filesGrid.addEventListener('touchstart', function(e) {
+                const fileCard = e.target.closest('.file-card');
+                selectedFile = fileCard ? fileCard.dataset.filename : null;
+                touchStartTime = Date.now();
+
+                touchTimer = setTimeout(() => {
+                    const touch = e.touches[0];
+                    showContextMenu(touch.clientX, touch.clientY);
+                    e.preventDefault();
+                }, 500);
+            }, { passive: false });
+
+            filesGrid.addEventListener('touchend', function(e) {
+                clearTimeout(touchTimer);
+
+                if (Date.now() - touchStartTime < 500) {
+                    const fileCard = e.target.closest('.file-card');
+                    if (fileCard) {
+                        if (fileCard.classList.contains('folder')) {
+                            navigateIntoFolder(fileCard.dataset.filename);
+                        } else {
+                            downloadFile(fileCard.dataset.filename);
+                        }
+                    } else {
+                        const touch = e.changedTouches[0];
+                        showContextMenu(touch.clientX, touch.clientY);
+                    }
+                }
+            });
+
+            filesGrid.addEventListener('touchmove', function() {
+                clearTimeout(touchTimer);
+            });
+
+            filesGrid.addEventListener('contextmenu', function(e) {
+                e.preventDefault();
+                const fileCard = e.target.closest('.file-card');
+                selectedFile = fileCard ? fileCard.dataset.filename : null;
+                showContextMenu(e.clientX, e.clientY);
+            });
+        }
+
+        function handleDoubleClick(e) {
+            const fileCard = e.target.closest('.file-card');
+            if (fileCard && fileCard.classList.contains('folder')) {
+                navigateIntoFolder(fileCard.dataset.filename);
+            }
+        }
+
+        function navigateIntoFolder(folderName) {
+            pathHistory.push(currentPath);
+            currentPath = currentPath ? `${currentPath}/${folderName}` : folderName;
+            updateBreadcrumb();
+            loadFiles();
+        }
+
+        function navigateToFolder(path) {
+            pathHistory = [];
+            currentPath = path;
+            updateBreadcrumb();
+            loadFiles();
+        }
+
+        function navigateBack() {
+            if (pathHistory.length > 0) {
+                currentPath = pathHistory.pop();
+                updateBreadcrumb();
+                loadFiles();
+            }
+        }
+
+        function resetNavigation() {
+            currentPath = '';
+            pathHistory = [];
+            updateBreadcrumb();
+        }
+
+        function updateBreadcrumb() {
+            const breadcrumb = document.getElementById('breadcrumb');
+            breadcrumb.innerHTML = '';
+
+            const rootItem = document.createElement('div');
+            rootItem.className = 'breadcrumb-item';
+            rootItem.textContent = currentCategory === 'common' ? 'Общие файлы' : 'Личные файлы';
+            rootItem.onclick = () => navigateToFolder('');
+            breadcrumb.appendChild(rootItem);
+
+            if (currentPath) {
+                const pathParts = currentPath.split('/');
+                let accumulatedPath = '';
+
+                pathParts.forEach((part, index) => {
+                    const separator = document.createElement('span');
+                    separator.className = 'breadcrumb-separator';
+                    separator.textContent = '/';
+                    breadcrumb.appendChild(separator);
+
+                    accumulatedPath += (accumulatedPath ? '/' : '') + part;
+
+                    const item = document.createElement('div');
+                    item.className = 'breadcrumb-item';
+                    item.textContent = part;
+                    item.onclick = () => navigateToFolder(accumulatedPath);
+                    breadcrumb.appendChild(item);
+                });
+            }
+        }
+
+        function showContextMenu(x, y) {
+            const contextMenu = document.getElementById('context-menu');
+            contextMenu.style.display = 'flex';
+
+            const rect = contextMenu.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+
+            let left = x;
+            let top = y;
+
+            if (left + rect.width > viewportWidth) {
+                left = viewportWidth - rect.width - 10;
+            }
+
+            if (top + rect.height > viewportHeight) {
+                top = viewportHeight - rect.height - 10;
+            }
+
+            contextMenu.style.left = left + 'px';
+            contextMenu.style.top = top + 'px';
+        }
+
+        function hideContextMenu() {
+            document.getElementById('context-menu').style.display = 'none';
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            document.querySelector(`.nav-tab[data-tab="${tabName}"]`).classList.add('active');
+
+            if (tabName === 'files') {
+                loadFiles();
+            }
+        }
+
+        async function loadChat() {
+            try {
+                const response = await fetch('/api/chat');
+                const messages = await response.json();
+
+                if (messages.length > 0 && messages[messages.length-1].timestamp !== lastChatUpdate) {
+                    renderMessages(messages);
+                    lastChatUpdate = messages[messages.length-1].timestamp;
+                }
+            } catch (error) {
+                console.error('Error loading chat:', error);
+            }
+        }
+
+        function renderMessages(messages) {
+            const container = document.getElementById('chat-messages');
+            container.innerHTML = '';
+
+            messages.forEach(msg => {
+                const messageEl = document.createElement('div');
+                messageEl.className = `message ${msg.username === '{{ user.username }}' ? 'own' : 'other'}`;
+
+                const time = new Date(msg.timestamp).toLocaleTimeString();
+
+                messageEl.innerHTML = `
+                    <div class="message-sender">
+                        <span>${msg.name}</span>
+                        <span class="message-time">${time}</span>
+                    </div>
+                    <div class="message-text">${msg.message}</div>
+                `;
+
+                container.appendChild(messageEl);
+            });
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            try {
+                const formData = new FormData();
+                formData.append('message', message);
+
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    messageInput.value = '';
+                    loadChat();
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                showToast('Ошибка отправки сообщения');
+            }
+        }
+
+        async function loadFiles() {
+            try {
+                const url = currentPath
+                    ? `/api/files/${currentCategory}?path=${encodeURIComponent(currentPath)}`
+                    : `/api/files/${currentCategory}`;
+
+                const response = await fetch(url);
+                files = await response.json();
+                renderFiles();
+            } catch (error) {
+                console.error('Error loading files:', error);
+                showToast('Ошибка загрузки файлов');
+            }
+        }
+
+        function renderFiles() {
+            const container = document.getElementById('files-grid');
+            container.innerHTML = '';
+
+            if (files.length === 0) {
+                container.innerHTML = '<div class="no-files">Файлов нет</div>';
+                return;
+            }
+
+            files.forEach(file => {
+                const fileCard = document.createElement('div');
+                fileCard.className = `file-card ${file.type === 'folder' ? 'folder' : ''}`;
+                fileCard.dataset.filename = file.name;
+
+                let icon = 'fa-file';
+                if (file.type === 'folder') icon = 'fa-folder';
+                else if (file.name.match(/\.(jpg|jpeg|png|gif|webp)$/i)) icon = 'fa-file-image';
+                else if (file.name.match(/\.(pdf)$/i)) icon = 'fa-file-pdf';
+                else if (file.name.match(/\.(doc|docx)$/i)) icon = 'fa-file-word';
+                else if (file.name.match(/\.(xls|xlsx)$/i)) icon = 'fa-file-excel';
+                else if (file.name.match(/\.(zip|rar|7z|tar|gz)$/i)) icon = 'fa-file-archive';
+
+                const size = file.type === 'folder' ? '' : formatFileSize(file.size);
+                const modified = new Date(file.modified * 1000).toLocaleDateString();
+
+                fileCard.innerHTML = `
+                    <div class="file-icon ${file.type === 'folder' ? 'folder' : ''}">
+                        <i class="fas ${icon}"></i>
+                    </div>
+                    <div class="file-name">${file.name}</div>
+                    <div class="file-details">${size} ${modified}</div>
+                `;
+
+                container.appendChild(fileCard);
+            });
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                uploadFiles(files);
+            }
+        }
+
+        function handleDroppedFiles(files) {
+            uploadFiles(files);
+        }
+
+        async function uploadFiles(fileList) {
+            if (isUploading) return;
+            isUploading = true;
+
+            const progressBar = document.getElementById('progress-bar');
+            const progressInner = document.getElementById('progress-bar-inner');
+
+            progressBar.style.display = 'block';
+            progressInner.style.width = '0%';
+
+            try {
+                for (let i = 0; i < fileList.length; i++) {
+                    const file = fileList[i];
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    if (currentPath) {
+                        formData.append('path', currentPath);
+                    }
+
+                    const xhr = new XMLHttpRequest();
+
+                    xhr.upload.addEventListener('progress', (e) => {
+                        if (e.lengthComputable) {
+                            const percentComplete = (e.loaded / e.total) * 100;
+                            progressInner.style.width = percentComplete + '%';
+                        }
+                    });
+
+                    await new Promise((resolve, reject) => {
+                        xhr.onreadystatechange = function() {
+                            if (xhr.readyState === 4) {
+                                if (xhr.status === 200) {
+                                    resolve();
+                                } else {
+                                    reject(new Error('Upload failed'));
+                                }
+                            }
+                        };
+
+                        xhr.open('POST', `/api/upload/${currentCategory}?path=${encodeURIComponent(currentPath)}`, true);
+                        xhr.send(formData);
+                    });
+                }
+
+                showToast('Файлы успешно загружены');
+                loadFiles();
+            } catch (error) {
+                console.error('Upload error:', error);
+                showToast('Ошибка загрузки файлов');
+            } finally {
+                isUploading = false;
+                progressBar.style.display = 'none';
+                document.getElementById('file-upload').value = '';
+            }
+        }
+
+        function downloadFile(filename) {
+            window.open(`/api/download/${currentCategory}/${filename}?path=${encodeURIComponent(currentPath)}`, '_blank');
+        }
+
+        function downloadSelectedFile() {
+            if (selectedFile) {
+                downloadFile(selectedFile);
+                hideContextMenu();
+            }
+        }
+
+        function openRenameModal() {
+            if (selectedFile) {
+                document.getElementById('rename-input').value = selectedFile;
+                openModal('rename-modal');
+            }
+        }
+
+        function openDeleteModal() {
+            if (selectedFile) {
+                document.getElementById('delete-filename').textContent = selectedFile;
+                openModal('delete-modal');
+            }
+        }
+
+        function createNewFolder() {
+            selectedFile = null;
+            document.getElementById('folder-input').value = '';
+            openModal('folder-modal');
+        }
+
+        async function renameFile() {
+            const newName = document.getElementById('rename-input').value.trim();
+            if (!newName || !selectedFile) return;
+
+            try {
+                const response = await fetch(`/api/rename/${currentCategory}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        oldName: selectedFile,
+                        newName: newName,
+                        path: currentPath
+                    })
+                });
+
+                if (response.ok) {
+                    showToast('Файл переименован');
+                    closeModal('rename-modal');
+                    loadFiles();
+                } else {
+                    showToast('Ошибка переименования');
+                }
+            } catch (error) {
+                console.error('Rename error:', error);
+                showToast('Ошибка переименования');
+            }
+        }
+
+        async function deleteFile() {
+            if (!selectedFile) return;
+
+            try {
+                const response = await fetch(`/api/files/${currentCategory}/${selectedFile}?path=${encodeURIComponent(currentPath)}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showToast('Файл удален');
+                    closeModal('delete-modal');
+                    loadFiles();
+                } else {
+                    showToast('Ошибка удаления');
+                }
+            } catch (error) {
+                console.error('Delete error:', error);
+                showToast('Ошибка удаления');
+            }
+        }
+
+        async function createFolder() {
+            const folderName = document.getElementById('folder-input').value.trim();
+            if (!folderName) return;
+
+            try {
+                const response = await fetch(`/api/folder/${currentCategory}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        folderName: folderName,
+                        path: currentPath
+                    })
+                });
+
+                if (response.ok) {
+                    showToast('Папка создана');
+                    closeModal('folder-modal');
+                    loadFiles();
+                } else {
+                    showToast('Ошибка создания папки');
+                }
+            } catch (error) {
+                console.error('Create folder error:', error);
+                showToast('Ошибка создания папки');
+            }
+        }
+
+        function openModal(modalId) {
+            document.getElementById(modalId).classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        const messageInput = document.getElementById('message-input');
+        const sendButton = document.getElementById('send-button');
+        const fileUpload = document.getElementById('file-upload');
+        const filesGrid = document.getElementById('files-grid');
+    </script>
+</body>
+</html>
