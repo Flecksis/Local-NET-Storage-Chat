@@ -1,6 +1,4 @@
 
-set -e
-
 APP_NAME="local-net-storage-chat"
 INSTALL_DIR="/opt/$APP_NAME"
 SERVICE_FILE="/etc/systemd/system/$APP_NAME.service"
