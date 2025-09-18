@@ -19,7 +19,7 @@ fi
 
 cd "$INSTALL_DIR"
 
-sudo pip3 install -r requirements.txt
+sudo pip3 install -r requirements.txt --break-system-packages
 
 
 echo ">>> Создание systemd сервиса..."
